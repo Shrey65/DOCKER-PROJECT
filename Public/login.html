@@ -1,90 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sign In</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="container">
+    <main class="container">
 
-    <h2>Login</h2>
+        <h2>Sign In</h2>
 
-    <form id="loginForm">
+        <form id="signInForm">
 
-        <input
-            type="email"
-            id="email"
-            placeholder="Email"
-            required
-        >
+            <input
+                type="email"
+                id="userEmail"
+                placeholder="Enter your email"
+                required
+            >
 
-        <input
-            type="password"
-            id="password"
-            placeholder="Password"
-            required
-        >
+            <input
+                type="password"
+                id="userPassword"
+                placeholder="Enter your password"
+                required
+            >
 
-        <button type="submit">
-            Login
-        </button>
+            <button type="submit">
+                Sign In
+            </button>
 
-    </form>
+        </form>
 
-    <p id="message"></p>
+        <p id="statusMessage"></p>
 
-    <a href="register.html">
-        Create new account
-    </a>
+        <p>
+            Don't have an account?
+            <a href="register.html">Register here</a>
+        </p>
 
-</div>
+    </main>
 
-<script>
+    <script>
 
-document.getElementById("loginForm")
-.addEventListener("submit", async (e) => {
+        const signInForm = document.getElementById("signInForm");
+        const statusMessage = document.getElementById("statusMessage");
 
-    e.preventDefault();
+        signInForm.addEventListener("submit", async function(event) {
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+            event.preventDefault();
 
-    const response = await fetch("/login", {
+            const email = document.getElementById("userEmail").value.trim();
+            const password = document.getElementById("userPassword").value;
 
-        method: "POST",
+            try {
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+                const result = await fetch("/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
 
-        body: JSON.stringify({
-            email,
-            password
-        })
+                const data = await result.json();
 
-    });
+                statusMessage.textContent =
+                    data.message || "Unable to sign in.";
 
-    const data = await response.json();
+                if (result.ok && data.token) {
 
-    document.getElementById("message")
-        .innerText = data.message;
+                    localStorage.setItem("token", data.token);
 
-    if (response.ok) {
+                    window.location.href = "home.html";
+                }
 
-        localStorage.setItem(
-            "token",
-            data.token
-        );
+            } catch (error) {
 
-        window.location.href = "home.html";
-    }
+                statusMessage.textContent =
+                    "Something went wrong. Please try again.";
+            }
 
-});
+        });
 
-</script>
+    </script>
 
 </body>
+
 </html>

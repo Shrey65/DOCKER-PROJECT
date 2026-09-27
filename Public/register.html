@@ -1,95 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Register</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="container">
+    <main class="container">
 
-    <h2>Register</h2>
+        <h2>Create Account</h2>
 
-    <form id="registerForm">
+        <form id="signupForm">
 
-        <input
-            type="text"
-            id="name"
-            placeholder="Name"
-            required
-        >
+            <input
+                type="text"
+                id="fullName"
+                placeholder="Enter your name"
+                required
+            >
 
-        <input
-            type="email"
-            id="email"
-            placeholder="Email"
-            required
-        >
+            <input
+                type="email"
+                id="userEmail"
+                placeholder="Enter your email"
+                required
+            >
 
-        <input
-            type="password"
-            id="password"
-            placeholder="Password"
-            required
-        >
+            <input
+                type="password"
+                id="userPassword"
+                placeholder="Create a password"
+                required
+            >
 
-        <button type="submit">
-            Register
-        </button>
+            <button type="submit">
+                Sign Up
+            </button>
 
-    </form>
+        </form>
 
-    <p id="message"></p>
+        <p id="statusMessage"></p>
 
-    <a href="login.html">
-        Already have an account? Login
-    </a>
+        <p>
+            Already registered?
+            <a href="login.html">Sign in here</a>
+        </p>
 
-</div>
+    </main>
 
-<script>
+    <script>
 
-document.getElementById("registerForm")
-.addEventListener("submit", async (e) => {
+        const signupForm = document.getElementById("signupForm");
+        const statusMessage = document.getElementById("statusMessage");
 
-    e.preventDefault();
+        signupForm.addEventListener("submit", async function(event) {
 
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+            event.preventDefault();
 
-    const response = await fetch("/register", {
+            const name = document.getElementById("fullName").value.trim();
+            const email = document.getElementById("userEmail").value.trim();
+            const password = document.getElementById("userPassword").value;
 
-        method: "POST",
+            try {
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+                const result = await fetch("/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password
+                    })
+                });
 
-        body: JSON.stringify({
-            name,
-            email,
-            password
-        })
+                const data = await result.json();
 
-    });
+                statusMessage.textContent =
+                    data.message || "Registration completed.";
 
-    const data = await response.json();
+                if (result.ok) {
 
-    document.getElementById("message")
-        .innerText = data.message;
+                    setTimeout(function() {
+                        window.location.href = "login.html";
+                    }, 1000);
 
-    if (response.ok) {
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 1000);
-    }
+                }
 
-});
+            } catch (error) {
 
-</script>
+                statusMessage.textContent =
+                    "Unable to register. Please try again.";
+
+            }
+
+        });
+
+    </script>
 
 </body>
+
 </html>

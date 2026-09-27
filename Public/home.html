@@ -1,76 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>User Dashboard</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="container">
+    <main class="container">
 
-    <h1>Home</h1>
+        <h1>Dashboard</h1>
 
-    <h2 id="welcome">
-        Loading...
-    </h2>
+        <h2 id="welcomeMessage">
+            Please wait...
+        </h2>
 
-    <p id="email"></p>
+        <p id="userEmail"></p>
 
-    <button onclick="logout()">
-        Logout
-    </button>
+        <button id="logoutBtn">
+            Sign Out
+        </button>
 
-</div>
+    </main>
 
-<script>
+    <script>
 
-async function loadHome() {
+        const welcomeMessage = document.getElementById("welcomeMessage");
+        const userEmail = document.getElementById("userEmail");
+        const logoutButton = document.getElementById("logoutBtn");
 
-    const token = localStorage.getItem("token");
+        async function getUserDetails() {
 
-    if (!token) {
-        window.location.href = "login.html";
-        return;
-    }
+            const authToken = localStorage.getItem("token");
 
-    const response = await fetch("/api/home", {
+            if (!authToken) {
+                window.location.replace("login.html");
+                return;
+            }
 
-        headers: {
-            "Authorization": "Bearer " + token
+            try {
+
+                const result = await fetch("/api/home", {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`
+                    }
+                });
+
+                if (!result.ok) {
+                    throw new Error("Session expired");
+                }
+
+                const userData = await result.json();
+
+                welcomeMessage.textContent = userData.message;
+                userEmail.textContent = `Logged in as: ${userData.user.email}`;
+
+            } catch (error) {
+
+                localStorage.removeItem("token");
+
+                window.location.replace("login.html");
+            }
         }
 
-    });
+        function signOut() {
 
-    if (!response.ok) {
+            localStorage.removeItem("token");
 
-        localStorage.removeItem("token");
+            window.location.replace("login.html");
+        }
 
-        window.location.href = "login.html";
+        logoutButton.addEventListener("click", signOut);
 
-        return;
-    }
+        getUserDetails();
 
-    const data = await response.json();
-
-    document.getElementById("welcome")
-        .innerText = data.message;
-
-    document.getElementById("email")
-        .innerText = "Email: " + data.user.email;
-}
-
-function logout() {
-
-    localStorage.removeItem("token");
-
-    window.location.href = "login.html";
-}
-
-loadHome();
-
-</script>
+    </script>
 
 </body>
+
 </html>
