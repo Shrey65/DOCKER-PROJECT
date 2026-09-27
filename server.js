@@ -10,10 +10,12 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = process.env.JWT_SECRET;
+const USERS_FILE = path.join(__dirname, "users.json");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
+// Fix: Serve static files directly from root since HTML files are there
+app.use(express.static(__dirname));
 
 // Read users from JSON
 function getUsers() {
@@ -31,6 +33,12 @@ function saveUsers(users) {
         JSON.stringify(users, null, 2)
     );
 }
+
+// ================= ROOT ROUTE =================
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
 
 // ================= REGISTER =================
 
