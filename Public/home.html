@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Home</h1>
+
+    <h2 id="welcome">
+        Loading...
+    </h2>
+
+    <p id="email"></p>
+
+    <button onclick="logout()">
+        Logout
+    </button>
+
+</div>
+
+<script>
+
+async function loadHome() {
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const response = await fetch("/api/home", {
+
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+
+    });
+
+    if (!response.ok) {
+
+        localStorage.removeItem("token");
+
+        window.location.href = "login.html";
+
+        return;
+    }
+
+    const data = await response.json();
+
+    document.getElementById("welcome")
+        .innerText = data.message;
+
+    document.getElementById("email")
+        .innerText = "Email: " + data.user.email;
+}
+
+function logout() {
+
+    localStorage.removeItem("token");
+
+    window.location.href = "login.html";
+}
+
+loadHome();
+
+</script>
+
+</body>
+</html>
